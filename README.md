@@ -66,3 +66,76 @@ The product interaction is marked as a CLI-style conversational workflow; the
 web page is its browser implementation, not a separate product concept. Real
 LLM access, MCP/tool-protocol integration, larger benchmark coverage, and
 production persistence are future extensions rather than current claims.
+
+## Feasibility-study benchmark
+
+The feasibility benchmark is separate from the deterministic product demo. It
+uses eight versioned learning-rate research records across four fault families:
+valid evidence, configuration mismatch, numerical failure, and metric-contract
+mismatch. Every case has a hidden oracle. Prompts never contain the oracle.
+
+The four conditions isolate different mechanisms:
+
+- `raw_record`: experiment record only; the small-model baseline.
+- `validator_augmented`: raw record plus deterministic validator events.
+- `socratic_checkpoint`: validator events plus a researcher purpose/prediction
+  checkpoint.
+- `gated_harness`: checkpoint condition plus a deterministic integrity policy:
+  a fatal validation event forces `evidence_status=invalid` and
+  `hypothesis_status=unresolved`. This is a safety guarantee, not improved LLM
+  reasoning.
+
+Providers must return this strict schema:
+
+```json
+{
+  "detected_faults": ["numerical_failure"],
+  "evidence_status": "invalid",
+  "hypothesis_status": "unresolved",
+  "next_action_code": "rerun_with_lower_learning_rate",
+  "rationale": "One sentence."
+}
+```
+
+The scorer reports schema compliance, fault precision/recall, evidence and
+hypothesis correctness, exact next-action correctness, and unsafe hypothesis
+updates. It scores the raw provider decision separately from the final gated
+decision.
+
+Export provider-neutral, blinded prompts:
+
+```powershell
+python scripts/run_feasibility.py --condition raw_record --write-prompts outputs/raw_prompts.jsonl
+python scripts/run_feasibility.py --condition gated_harness --write-prompts outputs/gated_prompts.jsonl
+```
+
+An open model or coding-agent adapter can write one JSON object per line with
+`scenario_id` plus the schema above, then be scored without oracle exposure:
+
+```powershell
+python scripts/run_feasibility.py --condition validator_augmented --responses outputs/qwen_responses.jsonl --provider-name qwen2.5-3b
+```
+
+An optional OpenAI Responses API adapter is implemented but never invoked by
+default. It reads `OPENAI_API_KEY` only when explicitly selected and requires
+the optional SDK (`pip install openai`):
+
+```powershell
+python scripts/run_feasibility.py --condition raw_record --provider openai --model YOUR_MODEL_ID
+```
+
+For the complete study, open `notebooks/feasibility_study_colab.ipynb` in
+Colab, add a Colab Secret named `OPENAI_API_KEY`, and run all cells. The
+notebook clones the repository, installs the optional SDK, runs the repository
+tests, evaluates all four conditions, and prints the generated reports. The
+same workflow can be run locally with:
+
+```powershell
+python scripts/run_all_conditions.py --provider openai --model YOUR_MODEL_ID
+```
+
+This benchmark is an evaluation contract, not a claim that the harness is
+better or cheaper. It does not train or post-train a model. A coding-agent
+comparison on the same prompt contract measures research-decision quality; a
+future end-to-end coding-agent benchmark must separately provide an executable
+ML repository and tool environment.

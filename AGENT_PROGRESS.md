@@ -10,10 +10,11 @@ Created the first deterministic vertical slice with explicit contracts,
 local literature retrieval, role boundaries, a synthetic executor, validation,
 research-state updates, a static frontend, and a regression test.
 
-**In progress:** SocraticLoop deterministic MVP design. The proposed first
-vertical slice uses a learning-rate experiment, a small literature knowledge
-base, retrieval before planning and after analysis, fixed checkpoints, a
-controlled configuration fault, and no LLM/API dependency.
+**Completed:** Replaced the initial three-case feasibility scaffold with a
+versioned eight-case benchmark and four explicit ablation conditions:
+`raw_record`, `validator_augmented`, `socratic_checkpoint`, and
+`gated_harness`. The gate is measured separately as deterministic policy, not
+as LLM reasoning.
 
 **Implementation status:** The repository contains the uncommitted MVP files
 documented in `README.md`. The demo runs locally at `http://127.0.0.1:8000`
@@ -31,11 +32,13 @@ web frontend: the browser renders the terminal-like conversation, while the
 API owns session state, checkpoint pause/resume, execution, validation, and
 research-state updates.
 
-**Next steps:** Review the published Site behavior, then expand benchmark
-scenarios and faults only after the current contract is accepted. A real LLM
-provider and MCP/tool-protocol adapter remain future work. Commit/push to the
-user's GitHub origin is pending because the target `.git` index is not writable
-and no GitHub HTTPS credential is available to the shell.
+**Next steps:** Export and run the frozen versioned prompts for Qwen under all
+four conditions, then inspect the provider and final-gated reports separately.
+Only after this benchmark audit should a same-contract OpenAI/coding-agent
+reference be run. The OpenAI Responses API adapter is implemented but not
+called; no API key is stored. Post-training and MCP/tool-protocol adapters
+remain future work. The user will create the next commit/push, suggested
+message: `Add feasibility study scaffold`.
 
 The local API-backed conversational demo is now implemented. The published
 static Site remains the earlier snapshot until this workflow is intentionally
@@ -105,3 +108,38 @@ Validation performed: the two workflow unit tests passed; Python compilation
 passed; a live API session was started and completed through both checkpoint
 requests; and the refreshed local browser page showed the new conversational
 UI. No LLM/API key or MCP integration was added.
+
+### 2026-09-28 — Feasibility-study scaffold
+
+Added the original feasibility scaffold. It was later superseded because the
+first Colab probe duplicated scenarios and scoring outside this versioned
+contract.
+
+Validation performed: six unit tests passed; direct and harness prompt export
+each wrote three blinded prompts; `git diff --check` passed.
+
+### 2026-09-28 — First GPU small-model feasibility probe
+
+Used a user-approved Google Colab T4 runtime (Tesla T4, 14.6 GB VRAM), not a
+GCP project resource. Installed BitsAndBytes 0.50.2 and ran
+`Qwen/Qwen2.5-3B-Instruct` in 4-bit quantization. The model completed all
+three direct and all three harness-condition prompts. The hidden oracle was
+not included in model input.
+
+The numerical comparison from that notebook is invalidated: it used manually
+duplicated scenario values and a keyword-based scorer instead of the repository
+contract. It remains evidence only that the 3B model can run in 4-bit on a T4
+and that it can violate a strict enum schema. It does not establish a harness
+effect. No post-training was performed.
+
+### 2026-09-28 — Reproducible feasibility-benchmark redesign
+
+Replaced the scaffold with eight versioned cases spanning valid evidence,
+configuration mismatch, numerical failure, and metric-contract mismatch. Each
+case has an explicit validity policy, required faults, exact action code, and
+hidden oracle. Implemented four ablation conditions, strict schema validation,
+fault precision/recall, unsafe-hypothesis-update measurement, and separate
+provider versus final-gated decisions. Added an optional OpenAI Responses API
+adapter that reads `OPENAI_API_KEY` only on explicit invocation, while external
+open models and coding-agent adapters use the same JSONL prompt/response
+contract. No API request was made.

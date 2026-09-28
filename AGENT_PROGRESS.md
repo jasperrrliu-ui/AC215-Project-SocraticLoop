@@ -26,13 +26,20 @@ role interfaces for Planner, Socratic Questioner, and Analyst; implement
 deterministic mock roles first; keep experiment execution and validation
 deterministic; keep literature evidence separate from experiment evidence; and
 leave real LLM access and MCP/tool-protocol integration as replaceable future
-adapters.
+adapters. The product interaction is now marked as a CLI-style conversational
+web frontend: the browser renders the terminal-like conversation, while the
+API owns session state, checkpoint pause/resume, execution, validation, and
+research-state updates.
 
 **Next steps:** Review the published Site behavior, then expand benchmark
 scenarios and faults only after the current contract is accepted. A real LLM
 provider and MCP/tool-protocol adapter remain future work. Commit/push to the
 user's GitHub origin is pending because the target `.git` index is not writable
 and no GitHub HTTPS credential is available to the shell.
+
+The local API-backed conversational demo is now implemented. The published
+static Site remains the earlier snapshot until this workflow is intentionally
+republished.
 
 ## History
 
@@ -83,3 +90,18 @@ commit to the GitHub `origin` failed because the shell has no GitHub HTTPS
 credential; no password or token was requested or stored. The source files are
 unchanged, and the commit remains available in the local staging metadata for
 later push through an authenticated Git client.
+
+### 2026-09-28 — CLI-style conversational demo
+
+Marked the product interaction as a CLI-style conversational workflow and
+implemented its browser version as an API-backed demo. `POST /api/sessions`
+starts a session, the API pauses at the purpose/prediction checkpoint, then
+continues through deterministic execution and validation after the user
+answers. A second interpretation checkpoint is required before the Analyst
+updates the research state. The frontend shows the terminal-like transcript
+and the live research-state panel side by side.
+
+Validation performed: the two workflow unit tests passed; Python compilation
+passed; a live API session was started and completed through both checkpoint
+requests; and the refreshed local browser page showed the new conversational
+UI. No LLM/API key or MCP integration was added.

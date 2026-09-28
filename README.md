@@ -11,10 +11,9 @@ for future Planner, Socratic Questioner, and Analyst LLM roles.
 Research question
 → literature retrieval
 → Planner experiment proposal
-→ purpose/prediction checkpoint
-→ synthetic experiment
-→ validation
-→ interpretation checkpoint
+→ purpose/prediction checkpoint (pause for researcher)
+→ synthetic experiment + validation
+→ interpretation checkpoint (pause for researcher)
 → evidence-based research-state update
 ```
 
@@ -34,8 +33,22 @@ python -m unittest discover -s tests -v
 python app.py
 ```
 
-Open http://127.0.0.1:8000 and select **Run synthetic experiment**. No API key,
-external service, or package installation is required.
+Open http://127.0.0.1:8000 and select **Run synthetic experiment**. The browser
+UI is intentionally CLI-style: it shows a conversational transcript while the
+Research State remains visible beside it. The API owns the session and pauses
+at each checkpoint, so the user must answer before the next stage proceeds.
+No API key, external service, or package installation is required.
+
+The local server exposes the same flow as JSON endpoints:
+
+- `POST /api/sessions`: start a deterministic research session.
+- `GET /api/sessions/{session_id}`: read the current research state.
+- `POST /api/sessions/{session_id}/checkpoints`: submit a checkpoint answer.
+- `GET /api/demo`: run the complete flow in one response for regression/debugging.
+
+Sessions are currently in-memory and intended for the local demo. A future
+implementation can replace this store with persistent storage without changing
+the conversational contract.
 
 ## Repository layout
 
@@ -49,5 +62,7 @@ external service, or package installation is required.
 - `tests/`: workflow regression tests.
 
 The demo intentionally separates literature evidence from experiment evidence.
-Real LLM access, MCP/tool-protocol integration, larger benchmark coverage,
-and production persistence are future extensions rather than current claims.
+The product interaction is marked as a CLI-style conversational workflow; the
+web page is its browser implementation, not a separate product concept. Real
+LLM access, MCP/tool-protocol integration, larger benchmark coverage, and
+production persistence are future extensions rather than current claims.

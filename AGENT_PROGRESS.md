@@ -4,6 +4,32 @@
 
 Updated: 2026-09-28.
 
+**In progress:** Corrected the feasibility-study target after the earlier
+GPT-4.1-mini run measured only component ablations. Added the primary A-D
+system contract: Codex/gpt-5.6-sol reference, Qwen2.5-Coder-3B raw, the same
+Qwen model with SocraticLoop, and a future QLoRA adapter with SocraticLoop.
+Added eight isolated executable tasks using deterministic, dependency-free
+logistic-regression training. The two valid cases produce opposite conclusions
+from real loss curves; configuration, numerical, and metric-contract faults
+are explicit controlled injections. Hidden oracles are not copied into task
+workspaces.
+
+**Current checks:** `python -m unittest discover -s tests -v` passes 16 tests;
+all eight executable tasks run locally; the supporting case yields validation
+losses 0.182919, 0.10784, 0.149402 for learning rates 0.001, 0.01, 0.1, while
+the refuting case makes 0.1 the best rate. Python compilation and
+`git diff --check` pass.
+
+**Current blocker:** The Codex reference runner is implemented, but the Codex
+CLI cannot initialize its state database from the current restricted shell
+(`state_5.sqlite` is read-only). No Codex baseline task completed or consumed a
+result. Run the documented command from normal PowerShell. Qwen B/C are ready
+for the new `notebooks/agent_benchmark_colab.ipynb`; they have not yet been run.
+The QLoRA condition remains intentionally unclaimed until a disjoint training
+set and adapter exist. A deterministic builder now creates 40 train and 8
+validation records with train-only IDs, and a one-epoch QLoRA script/notebook
+is implemented. The adapter has not been trained or evaluated yet.
+
 **Completed:** Read the AMDEX agent workflow materials (`AGENTS.md`, `README.md`,
 `PRD.md`, and `AGENT_PROGRESS.md`) before continuing SocraticLoop MVP work.
 Created the first deterministic vertical slice with explicit contracts,

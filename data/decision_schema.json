@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["detected_faults", "evidence_status", "hypothesis_status", "next_action_code", "rationale"],
+  "properties": {
+    "detected_faults": {
+      "type": "array",
+      "items": {"enum": ["configuration_mismatch", "numerical_failure", "metric_contract_mismatch"]},
+      "uniqueItems": true
+    },
+    "evidence_status": {"enum": ["valid", "invalid"]},
+    "hypothesis_status": {"enum": ["supported", "refuted", "unresolved"]},
+    "next_action_code": {
+      "enum": [
+        "run_narrower_learning_rate_sweep",
+        "increase_model_capacity",
+        "rerun_with_planned_config",
+        "rerun_with_lower_learning_rate",
+        "rerun_with_validation_metric",
+        "inspect_data_pipeline"
+      ]
+    },
+    "rationale": {"type": "string"}
+  }
+}

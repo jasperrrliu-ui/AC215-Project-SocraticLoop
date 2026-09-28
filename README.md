@@ -67,7 +67,53 @@ web page is its browser implementation, not a separate product concept. Real
 LLM access, MCP/tool-protocol integration, larger benchmark coverage, and
 production persistence are future extensions rather than current claims.
 
-## Feasibility-study benchmark
+## Feasibility studies
+
+### Main system comparison
+
+The primary feasibility study compares complete systems on eight isolated,
+executable learning-rate tasks:
+
+- `codex_reference`: Codex with `gpt-5.6-sol`, working directly in each task
+  directory with read/run tools.
+- `qwen_raw`: `Qwen/Qwen2.5-Coder-3B-Instruct` given the executed artifacts
+  without SocraticLoop validation or checkpoint context.
+- `qwen_harness`: the identical Qwen checkpoint with deterministic validator
+  events, researcher purpose/prediction context, and the evidence-validity
+  policy.
+- `qwen_qlora_harness`: the same harness with a separately trained PEFT/QLoRA
+  adapter. This condition must not be reported until an adapter is trained on
+  non-test trajectories.
+
+The task workspaces contain a dependency-free logistic-regression experiment,
+approved and actual configurations, a metric contract, and generated run
+artifacts. Hidden oracles stay in the evaluator and are never copied into an
+agent workspace. Prepare and execute all task fixtures with:
+
+```powershell
+python scripts/prepare_agent_benchmark.py
+```
+
+Run the strong coding-agent reference from a normal authenticated PowerShell
+environment:
+
+```powershell
+python scripts/run_codex_reference.py --model gpt-5.6-sol
+python scripts/score_agent_benchmark.py --system codex_reference --responses outputs/agent_benchmark/responses/codex_reference.jsonl
+```
+
+Systems B and C have a one-click GPU notebook at
+`notebooks/agent_benchmark_colab.ipynb`. It runs the same Qwen model before and
+after the SocraticLoop harness so the harness effect is not confounded by a
+model change.
+
+The optional D pilot is isolated in
+`notebooks/post_training_pilot_colab.ipynb`. It builds 48 train-only variants
+(40 train, 8 validation), performs one QLoRA epoch, and evaluates the saved
+adapter on the untouched eight-case benchmark. D is reported only after that
+notebook completes successfully.
+
+### Auxiliary component ablation
 
 The feasibility benchmark is separate from the deterministic product demo. It
 uses eight versioned learning-rate research records across four fault families:
@@ -134,8 +180,6 @@ same workflow can be run locally with:
 python scripts/run_all_conditions.py --provider openai --model YOUR_MODEL_ID
 ```
 
-This benchmark is an evaluation contract, not a claim that the harness is
-better or cheaper. It does not train or post-train a model. A coding-agent
-comparison on the same prompt contract measures research-decision quality; a
-future end-to-end coding-agent benchmark must separately provide an executable
-ML repository and tool environment.
+The earlier GPT-4.1-mini results from this section are an auxiliary harness
+component ablation, not the main model/system comparison. They must not be used
+to claim that SocraticLoop is better or cheaper than a coding agent.

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "smith-2015-clr",
+    "title": "Cyclical Learning Rates for Training Neural Networks",
+    "source": "https://arxiv.org/abs/1506.01186",
+    "topics": "learning rate range test optimization instability neural network training",
+    "claim": "A learning-rate range test can help identify reasonable learning-rate bounds; rates that become too large can lead to deteriorating training behavior."
+  },
+  {
+    "id": "synthetic-capacity-note",
+    "title": "Model capacity and validation behavior",
+    "source": "synthetic-method-note",
+    "topics": "model capacity validation loss experiment configuration",
+    "claim": "Increasing model capacity can improve validation performance, but it does not explain a configuration mismatch in an experiment."
+  }
+]

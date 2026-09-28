@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SocraticLoop MVP</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color: #172033; }
+    body { margin: 0; background: #f5f7fb; }
+    main { max-width: 1050px; margin: auto; padding: 32px 20px 60px; }
+    .sub { color: #5e6a7d; } .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .card { background: white; border: 1px solid #e0e6ef; border-radius: 12px; padding: 18px; box-shadow: 0 2px 8px #1720330d; }
+    .wide { grid-column: 1 / -1; } .tag { display: inline-block; background: #e9efff; color: #294fbe; padding: 4px 8px; border-radius: 999px; font-size: 12px; margin: 3px; }
+    .warning { background: #fff4df; border-left: 4px solid #e39a19; padding: 10px; }
+    .success { background: #eaf8ef; border-left: 4px solid #2b9b57; padding: 10px; }
+    button { border: 0; border-radius: 8px; padding: 10px 14px; background: #294fbe; color: white; cursor: pointer; }
+    pre { white-space: pre-wrap; background: #f5f7fb; padding: 12px; border-radius: 8px; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } .wide { grid-column: auto; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>SocraticLoop</h1>
+  <p class="sub">Deterministic research-state-aware experiment demo · no LLM/API required</p>
+  <p><button id="run">Run synthetic experiment</button></p>
+  <div id="app" class="grid"><div class="card wide">Run the experiment to load the workflow.</div></div>
+</main>
+<script>
+const esc = (x) => String(x ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+document.querySelector('#run').onclick = async () => {
+  const d = await fetch('/api/demo').then(r => r.json());
+  const s = d.research_state, e = s.experiment, v = d.validation, a = d.analysis;
+  document.querySelector('#app').innerHTML = `
+    <section class="card wide"><h2>Research question</h2><p>${esc(s.question)}</p>
+      <h3>Hypotheses</h3>${s.hypotheses.map(h => `<span class="tag">${esc(h.id)}: ${esc(h.text)}</span>`).join('')}</section>
+    <section class="card"><h2>Literature context</h2>${d.literature.map(x => `<p><b>${esc(x.title)}</b><br>${esc(x.claim)}<br><small>${esc(x.source)}</small></p>`).join('')}</section>
+    <section class="card"><h2>Planner</h2><p>${esc(e.goal)}</p><p><b>Planned learning rates:</b> ${esc(e.planned_config.learning_rates.join(', '))}</p><p>${esc(e.rationale)}</p></section>
+    <section class="card"><h2>Checkpoints</h2>${s.checkpoints.map(c => `<p><b>${esc(c.kind)}</b><br>${esc(c.question)}<br><i>${esc(c.answer)}</i></p>`).join('')}</section>
+    <section class="card"><h2>Validation</h2><div class="warning">${v.warnings.map(w => `<b>${esc(w.type)}:</b> ${esc(w.message)}`).join('<br>')}</div><pre>${esc(JSON.stringify(d.run.metrics, null, 2))}</pre></section>
+    <section class="card"><h2>Analyst and updated state</h2><div class="success"><b>${esc(a.interpretation)}</b><br>${esc(s.conclusion)}</div><h3>Evidence</h3>${s.evidence.map(x => `<p><b>${esc(x.type)}</b>: ${esc(x.claim)}</p>`).join('')}</section>`;
+};
+</script>
+</body>
+</html>

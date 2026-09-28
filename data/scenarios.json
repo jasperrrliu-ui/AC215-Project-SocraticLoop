@@ -1,0 +1,11 @@
+[
+  {
+    "id": "lr-instability-001",
+    "name": "Validation-loss instability",
+    "question": "Why does validation loss become unstable after a learning-rate increase?",
+    "hypotheses": [
+      {"id": "H1", "text": "The learning rate is too large."},
+      {"id": "H2", "text": "The model capacity is insufficient."}
+    ]
+  }
+]

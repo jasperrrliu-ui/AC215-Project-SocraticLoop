@@ -28,7 +28,11 @@ for the new `notebooks/agent_benchmark_colab.ipynb`; they have not yet been run.
 The QLoRA condition remains intentionally unclaimed until a disjoint training
 set and adapter exist. A deterministic builder now creates 40 train and 8
 validation records with train-only IDs, and a one-epoch QLoRA script/notebook
-is implemented. The adapter has not been trained or evaluated yet.
+is implemented. The first T4 attempt reached training but failed at gradient
+unscaling because BF16 gradients are unsupported on that AMP path. The trainer
+now uses the standard k-bit preparation step, FP16 quantized forward compute,
+FP32 trainable LoRA parameters, and explicitly disables BF16. The adapter has
+not yet completed training or evaluation after this correction.
 
 **Completed:** Read the AMDEX agent workflow materials (`AGENTS.md`, `README.md`,
 `PRD.md`, and `AGENT_PROGRESS.md`) before continuing SocraticLoop MVP work.

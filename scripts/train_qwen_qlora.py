@@ -17,13 +17,20 @@ def main() -> None:
 
     import torch
     from datasets import Dataset
-    from peft import LoraConfig
+    from peft import LoraConfig, prepare_model_for_kbit_training
     from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TrainingArguments
     from trl import SFTTrainer
 
     tokenizer = AutoTokenizer.from_pretrained(args.model)
     quantization = BitsAndBytesConfig(load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=torch.float16)
-    model = AutoModelForCausalLM.from_pretrained(args.model, device_map="auto", quantization_config=quantization)
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model,
+        device_map="auto",
+        quantization_config=quantization,
+        torch_dtype=torch.float16,
+    )
+    model = prepare_model_for_kbit_training(model)
+    model.config.use_cache = False
 
     def load(path: Path) -> Dataset:
         rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
@@ -48,6 +55,8 @@ def main() -> None:
         save_strategy="no",
         report_to="none",
         fp16=True,
+        bf16=False,
+        optim="paged_adamw_8bit",
     )
     lora = LoraConfig(r=8, lora_alpha=16, lora_dropout=0.05, target_modules=["q_proj", "k_proj", "v_proj", "o_proj"], task_type="CAUSAL_LM")
     trainer = SFTTrainer(
@@ -58,6 +67,11 @@ def main() -> None:
         peft_config=lora,
         processing_class=tokenizer,
     )
+    # T4 GPUs do not support the BF16 AMP unscale path. Keep the quantized
+    # forward pass in FP16 while accumulating LoRA gradients in FP32.
+    for parameter in trainer.model.parameters():
+        if parameter.requires_grad:
+            parameter.data = parameter.data.float()
     trainer.train()
     trainer.model.save_pretrained(args.output)
     tokenizer.save_pretrained(args.output)
